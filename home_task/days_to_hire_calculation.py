@@ -62,7 +62,7 @@ def calculate_days_to_hire(min_sample=5):
 
     try:
         print("Clear table")
-        session.execute(text("truncate table days_to_hire"))
+        session.execute(text("delete from days_to_hire"))
 
         print("Calculating days to hire stats")
         session.execute(text(query(min_sample)))

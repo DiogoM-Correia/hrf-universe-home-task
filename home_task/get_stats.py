@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
+from sqlalchemy.exc import SQLAlchemyError
 from .db import get_session
 
 app = FastAPI()
@@ -15,23 +16,30 @@ class DaysToHire(BaseModel):
 @app.get("/days-to-hire/{standard_job_id}", response_model=DaysToHire)
 def get_days_to_hire(standard_job_id: str, country_code: str = Query("WW", description="Country code")):
     session = get_session()
+    
+    try:
+        sql = """
+                SELECT standard_job_id, country_code, minimum, average, maximum, count
+                FROM days_to_hire 
+                WHERE standard_job_id = :standard_job_id AND country_code = :country_code
+            """
 
-    sql = """
-            SELECT standard_job_id, country_code, minimum, average, maximum, count
-            FROM days_to_hire 
-            WHERE standard_job_id = :standard_job_id AND country_code = :country_code
-        """
+        result = session.execute(sql, {"standard_job_id": standard_job_id, "country_code": country_code}).fetchone()
 
-    result = session.execute(sql, {"standard_job_id": standard_job_id, "country_code": country_code}).fetchone()
+        if not result:
+            raise HTTPException(status_code=404, detail="No data found")
 
-    if not result:
-        raise HTTPException(status_code=404, detail="No data found")
-
-    return DaysToHire(
-        standard_job_id=result[0],
-        country_code=result[1],
-        min_days=float(result[2]),
-        avg_days=float(result[3]),
-        max_days=float(result[4]),
-        job_postings_number=result[5]
-    ) 
+        return DaysToHire(
+            standard_job_id=result[0],
+            country_code=result[1],
+            min_days=float(result[2]),
+            avg_days=float(result[3]),
+            max_days=float(result[4]),
+            job_postings_number=result[5]
+        )
+        
+    except SQLAlchemyError as e:
+        logger.error(f"Database error: {e}")
+        raise HTTPException(status_code=500, detail="Database error occurred")
+    finally:
+        session.close() 
