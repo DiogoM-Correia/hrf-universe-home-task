@@ -21,9 +21,9 @@ def query(min_sample):
             , country_averages as (
                 select standard_job_id,
                     country_code,
-                    avg(days_to_hire) average,
-                    min(days_to_hire) minimum,
-                    max(days_to_hire) maximum,
+                    round(avg(days_to_hire), 1) average,
+                    round(min(days_to_hire), 1) minimum,
+                    round(max(days_to_hire), 1) maximum,
                     count(days_to_hire) samples
                 from valid_values
                 where country_code is not null
@@ -33,9 +33,9 @@ def query(min_sample):
             , global_averages as (
                 select standard_job_id,
                     'WW' country_code,
-                    avg(days_to_hire) average,
-                    min(days_to_hire) minimum,
-                    max(days_to_hire) maximum,
+                    round(avg(days_to_hire), 1) average,
+                    round(min(days_to_hire), 1) minimum,
+                    round(max(days_to_hire), 1) maximum,
                     count(days_to_hire) samples
                 from valid_values
                 group by standard_job_id

@@ -6,6 +6,7 @@ from sqlalchemy import (
     Integer,
     String,
     Table,
+    Numeric,
 )
 from sqlalchemy.orm import registry
 
@@ -77,16 +78,16 @@ class DaysToHire(Model):
         mapper_registry.metadata,
         Column("country_code", String, nullable=False, primary_key=True),
         Column("standard_job_id", String, nullable=False, primary_key=True),
-        Column("average", Integer, nullable=False),
-        Column("minimum", Integer, nullable=False),
-        Column("maximum", Integer, nullable=False),
+        Column("average", Numeric(5, 1), nullable=False),
+        Column("minimum", Numeric(5, 1), nullable=False),
+        Column("maximum", Numeric(5, 1), nullable=False),
         Column("count", Integer, nullable=False),
         schema="public",
     )
 
     standard_job_id: str
     country_code: str
-    average: int
-    minimum: int
-    maximum: int
+    average: float
+    minimum: float
+    maximum: float
     count: int
